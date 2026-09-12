@@ -1,3 +1,8 @@
+## Demo
+
+![GarryBot-V2-Stepper](images/GarryBot_V2_Stepper.JPG)
+
+![Balancing Demo](images/GarryBot_V2_Stepper.gif)
 # GarryBot-V2-Stepper
 
 Successor to the original **GarryBot-V1-DC**.
