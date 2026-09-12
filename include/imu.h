@@ -18,7 +18,7 @@ extern float gyroY_bias;
 
 // Functions
 void initializeIMU();
-void readMPU6050();
+bool readMPU6050();
 void calibrateGyroscope();
 
 #endif

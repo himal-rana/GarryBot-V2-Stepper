@@ -6,10 +6,11 @@ class PID
 public:
     PID(float kp, float ki, float kd);
 
-    int compute(float error, float dt);
+    float compute(float error, float dt);
 
     void reset();
     void setGains(float kp, float ki, float kd);
+    void setOutputLimit(float limit);
 
     float getKp() const;
     float getKi() const;
@@ -22,6 +23,7 @@ private:
 
     float integral;
     float previousError;
+    float outputLimit;
 };
 
 #endif

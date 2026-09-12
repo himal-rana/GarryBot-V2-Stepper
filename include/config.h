@@ -6,7 +6,6 @@
 // ===============================
 // I2C
 // ===============================
-
 constexpr uint8_t I2C_SDA = 21;
 constexpr uint8_t I2C_SCL = 22;
 
@@ -16,11 +15,6 @@ constexpr uint8_t I2C_SCL = 22;
 
 constexpr uint8_t MPU6050_ADDRESS = 0x68;
 
-// ===============================
-// OLED
-// ===============================
-
-constexpr uint8_t OLED_ADDRESS = 0x3C;
 
 // ===============================
 // LEFT TMC2209
@@ -42,13 +36,14 @@ constexpr uint8_t RIGHT_EN_PIN   = 14;
 // BALANCE
 // ===============================
 
-constexpr float TARGET_ANGLE = 0.0f;
+constexpr float TARGET_ANGLE = 14.0f;
+//if it moves reverse, increase this value, if it moves forward, decrease this value
 
 constexpr float MAX_TILT = 30.0f;
 
 // Temporary PID values
-constexpr float PID_KP = 10.8f;
+constexpr float PID_KP =400.0f;
 constexpr float PID_KI = 0.0f;
-constexpr float PID_KD = 0.19f;
+constexpr float PID_KD = 0.0f;
 
 #endif

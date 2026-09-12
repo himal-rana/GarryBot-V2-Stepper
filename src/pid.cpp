@@ -8,32 +8,49 @@ PID::PID(float kp, float ki, float kd)
 
     integral = 0.0f;
     previousError = 0.0f;
+
+    // Generic PID output limit
+    outputLimit = 800.0f;
 }
 
-int PID::compute(float error, float dt)
+float PID::compute(float error, float dt)
 {
-    // Integral term
+    // Protect against invalid dt
+    if (dt <= 0.0f)
+    {
+        return 0.0f;
+    }
+
+    // Integral
     integral += error * dt;
 
-    // Prevent integral windup
-    if (integral > 100) integral = 100;
-    if (integral < -100) integral = -100;
+    // Integral anti-windup
+    if (integral > 100.0f)
+        integral = 100.0f;
 
-    // Derivative term
-    float derivative = (error - previousError) / dt;
+    if (integral < -100.0f)
+        integral = -100.0f;
+
+    // Derivative
+    float derivative =
+        (error - previousError) / dt;
+
     previousError = error;
 
-    // PID output
+    // PID
     float output =
         kp * error +
         ki * integral +
         kd * derivative;
 
-    // Limit PWM
-    if (output > 255) output = 255;
-    if (output < -255) output = -255;
+    // Output limit
+    if (output > outputLimit)
+        output = outputLimit;
 
-    return (int)output;
+    if (output < -outputLimit)
+        output = -outputLimit;
+
+    return output;
 }
 
 void PID::reset()
@@ -41,12 +58,21 @@ void PID::reset()
     integral = 0.0f;
     previousError = 0.0f;
 }
-// Set PID gains for tuning with potentiometers
-void PID::setGains(float kp, float ki, float kd)
+
+void PID::setGains(
+    float kp,
+    float ki,
+    float kd
+)
 {
     this->kp = kp;
     this->ki = ki;
     this->kd = kd;
+}
+
+void PID::setOutputLimit(float limit)
+{
+    outputLimit = limit;
 }
 
 float PID::getKp() const

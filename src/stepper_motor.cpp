@@ -14,8 +14,14 @@ void StepperMotorController::begin()
     digitalWrite(LEFT_STEP_PIN, LOW);
     digitalWrite(RIGHT_STEP_PIN, LOW);
 
-    disable();
+    currentSpeed = 0.0f;
+    targetSpeed = 0.0f;
 
+    lastStepTime = micros();
+    lastSpeedUpdate = micros();
+
+    disable();
+    directionForward = false;
     setDirection(true);
 }
 
@@ -34,6 +40,9 @@ void StepperMotorController::disable()
     digitalWrite(RIGHT_EN_PIN, HIGH);
 
     enabled = false;
+
+    currentSpeed = 0.0f;
+    targetSpeed = 0.0f;
 }
 
 bool StepperMotorController::isEnabled() const
@@ -43,6 +52,10 @@ bool StepperMotorController::isEnabled() const
 
 void StepperMotorController::setDirection(bool forward)
 {
+    // Only update DIR pins if direction actually changes
+    if (directionForward == forward)
+        return;
+
     directionForward = forward;
 
     digitalWrite(
@@ -59,35 +72,15 @@ void StepperMotorController::setDirection(bool forward)
 
 void StepperMotorController::setSpeed(float stepsPerSecond)
 {
+    // PID only sets the target.
+    // update() will ramp toward this speed.
     targetSpeed = stepsPerSecond;
-
-    if (targetSpeed == 0.0f)
-    {
-        stepInterval = 0;
-        return;
-    }
-
-    if (targetSpeed > 0.0f)
-    {
-        setDirection(true);
-    }
-    else
-    {
-        setDirection(false);
-    }
-
-    float speedMagnitude = fabs(targetSpeed);
-
-    stepInterval =
-        (unsigned long)(
-            1000000.0f / speedMagnitude
-        );
 }
 
 void StepperMotorController::stop()
 {
     targetSpeed = 0.0f;
-    stepInterval = 0;
+    currentSpeed = 0.0f;
 }
 
 void StepperMotorController::update()
@@ -95,10 +88,85 @@ void StepperMotorController::update()
     if (!enabled)
         return;
 
-    if (stepInterval == 0)
+    unsigned long now = micros();
+
+
+    // ==============================================
+    // Acceleration ramp
+    // ==============================================
+
+    float dt =
+        (now - lastSpeedUpdate)
+        / 1000000.0f;
+
+    lastSpeedUpdate = now;
+
+    // Protect against strange timing
+    if (dt <= 0.0f)
         return;
 
-    unsigned long now = micros();
+    float maxSpeedChange =
+        maxAcceleration * dt;
+
+
+    if (targetSpeed > currentSpeed)
+    {
+        currentSpeed += maxSpeedChange;
+
+        if (currentSpeed > targetSpeed)
+        {
+            currentSpeed = targetSpeed;
+        }
+    }
+    else if (targetSpeed < currentSpeed)
+    {
+        currentSpeed -= maxSpeedChange;
+
+        if (currentSpeed < targetSpeed)
+        {
+            currentSpeed = targetSpeed;
+        }
+    }
+
+
+    // ==============================================
+    // Stop region
+    // ==============================================
+
+    if (fabs(currentSpeed) < 1.0f)
+    {
+        currentSpeed = 0.0f;
+        return;
+    }
+
+
+    // ==============================================
+    // Direction
+    // ==============================================
+
+    bool forward =
+        currentSpeed > 0.0f;
+
+    setDirection(forward);
+
+
+    // ==============================================
+    // Step interval
+    // ==============================================
+
+    float speedMagnitude =
+        fabs(currentSpeed);
+
+    unsigned long stepInterval =
+        (unsigned long)(
+            1000000.0f /
+            speedMagnitude
+        );
+
+
+    // ==============================================
+    // Generate step pulse
+    // ==============================================
 
     if (now - lastStepTime >= stepInterval)
     {

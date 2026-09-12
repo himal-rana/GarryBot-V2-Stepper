@@ -50,24 +50,40 @@ void initializeIMU()
 // Read Raw Sensor Data
 // =====================================================
 
-void readMPU6050()
+bool readMPU6050()
 {
     Wire.beginTransmission(MPU6050_ADDRESS);
-    Wire.write(0x3B);              // ACCEL_XOUT_H
-    Wire.endTransmission(false);
+    Wire.write(0x3B);
 
-    Wire.requestFrom(MPU6050_ADDRESS, 14, true);
+    if (Wire.endTransmission(false) != 0)
+    {
+        return false;
+    }
+
+    int bytesReceived =
+        Wire.requestFrom(
+            MPU6050_ADDRESS,
+            14,
+            true
+        );
+
+    if (bytesReceived != 14)
+    {
+        return false;
+    }
 
     accelX_raw = (Wire.read() << 8) | Wire.read();
     accelY_raw = (Wire.read() << 8) | Wire.read();
     accelZ_raw = (Wire.read() << 8) | Wire.read();
 
-    Wire.read();   // Temperature High
-    Wire.read();   // Temperature Low
+    Wire.read();
+    Wire.read();
 
     gyroX_raw = (Wire.read() << 8) | Wire.read();
     gyroY_raw = (Wire.read() << 8) | Wire.read();
     gyroZ_raw = (Wire.read() << 8) | Wire.read();
+
+    return true;
 }
 
 
