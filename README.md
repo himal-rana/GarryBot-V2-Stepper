@@ -65,7 +65,6 @@ The right motor direction is inverted in software because the two motors are mou
 
 The control flow of GarryBot-V2-Stepper is:
 
-```text
 MPU6050
    ↓
 Accelerometer + Gyroscope
@@ -83,6 +82,7 @@ Motor steps
 TMC2209 Drivers
    ↓
 NEMA17 Motors
+
 ## Working Configuration
 
 The following parameters produced a stable balancing response in the current prototype.
