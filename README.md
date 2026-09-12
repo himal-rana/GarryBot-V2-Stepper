@@ -4,22 +4,25 @@ Successor to the original **GarryBot-V1-DC**.
 
 ## Overview
 
-GarryBot-V2-Stepper is a two-wheeled self-balancing robot built around an ESP32, MPU6050 IMU, NEMA17 stepper motors, and TMC2209 stepper drivers.
+GarryBot-V2-Stepper is a two-wheeled self-balancing robot built around an ESP32, IMU MPU6050, NEMA17 stepper motors, and TMC2209 stepper drivers.
 
-The main reason for moving from DC motors to stepper motors was to reduce the motor dead-zone and inconsistent low-speed response observed in the first GarryBot version. The stepper-based drivetrain gives more predictable wheel motion and provides a better platform for future work on position and motion control.
+The main reason for moving from DC motors to stepper motors was to reduce the motor dead-zone and inconsistent low-speed response observed in the first GarryBot version. The stepper motors give more predictable wheel motion and provide a better platform for future work on position and motion control.
 
-The robot estimates its pitch angle using accelerometer and gyroscope data from the MPU6050. A complementary filter is used for angle estimation, and a PID controller generates the required wheel speed command. The ESP32 then converts the control output directly into step pulses for the TMC2209 drivers.
+The robot estimates its pitch angle using simple complementary filter to fuse accelerometer and gyroscope data from the MPU6050. A PID control loop is used to generate the required wheel speed command. The ESP32 then converts the control output directly into step pulses for the TMC2209 drivers.
 
 ## Hardware
 
-- ESP32 development board
-- MPU6050 IMU
+- ESP32 as microcontroller
+- MPU6050 as IMU
 - 2 × NEMA17 stepper motors
 - 2 × TMC2209 stepper drivers
 - 2 × wheels
-- 2S LiPo battery / suitable power supply
-- Buck converter for regulated electronics supply
-- Robot chassis and mounting hardware
+- 3S 11.1V LiPo battery
+- LM2596 as Buck converter for ESP32 power supply
+- 3D printed robot frame
+- Zip ties to affix battery
+- Double sided tape to fix components on frame
+- A Rocker switch
 
 ### Stepper Motor
 
@@ -58,3 +61,46 @@ The robot estimates its pitch angle using accelerometer and gyroscope data from 
 | EN | GPIO14 |
 
 The right motor direction is inverted in software because the two motors are mounted as mirrored wheel drives.
+## System Architecture
+
+The control flow of GarryBot-V2-Stepper is:
+
+```text
+MPU6050
+   ↓
+Accelerometer + Gyroscope
+   ↓
+Complementary Filter
+   ↓
+Filtered Pitch Angle
+   ↓
+PID Controller
+   ↓
+Target Stepper Speed
+   ↓
+Motor steps
+   ↓
+TMC2209 Drivers
+   ↓
+NEMA17 Motors
+## Working Configuration
+
+The following parameters produced a stable balancing response in the current prototype.
+
+| Parameter | Value |
+|---|---:|
+| Control loop frequency | 250 Hz |
+| Control interval | 4000 µs |
+| Target balance angle | 13.8° |
+| PID output limit | 3000 steps/s |
+| Microstepping | 1/8 |
+| Effective steps/revolution | 1600 |
+| Stepper acceleration limit | 50,000 steps/s² |
+| Complementary filter coefficient | 0.985 |
+
+### PID Gains
+
+```text
+Kp = ...
+Ki = ...
+Kd = ...
