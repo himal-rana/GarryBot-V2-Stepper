@@ -1,127 +1,60 @@
-<<<<<<< HEAD
-# 🤖 GarryBot
-
-<p align="center">
-  <img src="images/garrybot_demo.gif" alt="GarryBot Demo" width="450">
-</p>
-
-<p align="center">
-  <img src="images/garrybot.JPG" alt="GarryBot" width="450">
-</p>
-
-> **A self-balancing two-wheeled robot designed and programmed from scratch using Arduino Uno, MPU6050, and PlatformIO.**
-
-![Status](https://img.shields.io/badge/Status-Working-success)
-![Platform](https://img.shields.io/badge/Platform-Arduino_Uno-blue)
-![Language](https://img.shields.io/badge/Language-C++-orange)
-![IDE](https://img.shields.io/badge/IDE-PlatformIO-green)
-
----
-
-# 📖 Overview
-
-GarryBot is a self-balancing robot developed to explore embedded systems, robotics, and control engineering through hands-on implementation.
-
-Rather than relying on third-party balancing libraries, every major subsystem—including the MPU6050 driver, complementary filter, PID controller, and motor driver—was implemented as a separate C++ module. The objective is to understand the engineering principles behind each component while developing clean, maintainable, and reusable embedded software.
-
----
-
-# 🎯 Objectives
-
-- Build a self-balancing robot from the ground up.
-- Learn embedded C++ using PlatformIO.
-- Understand IMU sensor fusion.
-- Design and tune a PID controller.
-- Develop a modular software architecture.
-- Build a professional robotics portfolio project.
-
----
-
-# ✨ Current Features
-
-- ✅ MPU6050 IMU driver
-- ✅ Gyroscope calibration
-- ✅ Accelerometer angle estimation
-- ✅ Complementary filter
-- ✅ PID balancing controller
-- ✅ PWM motor control
-- ✅ Emergency stop
-- ✅ Modular C++ architecture
-- ✅ Stable self-balancing
----
-
-# 🛠 Hardware
-
-| Component | Description |
-|-----------|-------------|
-| Arduino Uno | Main microcontroller |
-| MPU6050 | 6-axis IMU (Accelerometer + Gyroscope) |
-| L298N | Dual H-Bridge motor driver |
-| TT DC Motors | Drive motors |
-| 12V adapter | Power source |
-| LM2596 DC to DC Buck Converter  | Regulates voltage for the Arduino |
-
----
-# 🏗️ Software Architecture
-
-The robot software is organized into independent modules. Each module has a single responsibility, making the project easier to understand, debug, and extend.
-
-```text
-                +------------------+
-                |    MPU6050 IMU   |
-                +--------+---------+
-                         |
-                         v
-                +------------------+
-                | Complementary    |
-                |     Filter       |
-                +--------+---------+
-                         |
-                         v
-                +------------------+
-                | PID Controller   |
-                +--------+---------+
-                         |
-                         v
-                +------------------+
-                |  Motor Driver    |
-                +--------+---------+
-                         |
-                         v
-                +------------------+
-                |   DC Motors      |
-                +------------------+
-```
----
-
-# 📂 Project Structure
-
-```text
-GarryBot/
-├── include/               # Header files
-│   ├── config.h
-│   ├── filter.h
-│   ├── imu.h
-│   ├── motor.h
-│   └── pid.h
-│
-├── src/                   # Source files
-│   ├── main.cpp
-│   ├── filter.cpp
-│   ├── imu.cpp
-│   ├── motor.cpp
-│   └── pid.cpp
-│
-├── lib/                   # External libraries (if any)
-├── test/                  # Unit tests
-├── images/                # Images and GIFs
-├── docs/                  # Documentation
-│
-├── platformio.ini         # PlatformIO configuration
-├── README.md
-└── .gitignore
-```
-=======
 # GarryBot-V2-Stepper
-Successor to the original GarryBot-V1-DC. This version uses NEMA17 stepper motors with TMC2209 drivers, controlled by an ESP32 with MPU6050 feedback. The main goal is to eliminate the motor dead zone seen in the DC version and create a better platform for future position and motion control.
->>>>>>> 1e3a2e7e0b2d8155c5a75efd727b5972edd40e39
+
+Successor to the original **GarryBot-V1-DC**.
+
+## Overview
+
+GarryBot-V2-Stepper is a two-wheeled self-balancing robot built around an ESP32, MPU6050 IMU, NEMA17 stepper motors, and TMC2209 stepper drivers.
+
+The main reason for moving from DC motors to stepper motors was to reduce the motor dead-zone and inconsistent low-speed response observed in the first GarryBot version. The stepper-based drivetrain gives more predictable wheel motion and provides a better platform for future work on position and motion control.
+
+The robot estimates its pitch angle using accelerometer and gyroscope data from the MPU6050. A complementary filter is used for angle estimation, and a PID controller generates the required wheel speed command. The ESP32 then converts the control output directly into step pulses for the TMC2209 drivers.
+
+## Hardware
+
+- ESP32 development board
+- MPU6050 IMU
+- 2 × NEMA17 stepper motors
+- 2 × TMC2209 stepper drivers
+- 2 × wheels
+- 2S LiPo battery / suitable power supply
+- Buck converter for regulated electronics supply
+- Robot chassis and mounting hardware
+
+### Stepper Motor
+
+- Model: 17HS3401S / 42SHDC3030Z-23WB-1
+- Step angle: 1.8°
+- Rated current: 1.0 A/phase
+- Full steps per revolution: 200
+- Microstepping used: 1/8
+- Effective steps per revolution: 1600
+
+## Pin Configuration
+
+### MPU6050
+
+| Signal | ESP32 |
+|---|---|
+| SDA | GPIO21 |
+| SCL | GPIO22 |
+| VCC | Regulated supply |
+| GND | GND |
+
+### Left TMC2209
+
+| Signal | ESP32 |
+|---|---|
+| STEP | GPIO25 |
+| DIR | GPIO26 |
+| EN | GPIO27 |
+
+### Right TMC2209
+
+| Signal | ESP32 |
+|---|---|
+| STEP | GPIO32 |
+| DIR | GPIO33 |
+| EN | GPIO14 |
+
+The right motor direction is inverted in software because the two motors are mounted as mirrored wheel drives.
